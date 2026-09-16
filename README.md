@@ -1,141 +1,232 @@
-# IBPS SO IT — Mock exam
+# MockBySu — IBPS SO IT Officer Mock Exam
 
-A mobile-first exam engine for IBPS SO (IT Officer) practice. You choose the
-subjects, the number of questions and the clock; the app writes a prompt for any
-chatbot, validates the JSON that comes back, runs the timed paper and keeps
-every attempt in the browser.
+Build your own mock test, take it under a clock, and keep every attempt on
+your own device. No accounts, no backend, no server-side scoring — the whole
+app runs client-side and stores everything in the browser's local storage.
 
-Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4.
-No backend, no database, no API keys.
+**Live app:** https://mockbysu.vercel.app
+**Android app:** distributed as a signed APK via [GitHub Releases](https://github.com/sushovancpp/mockbysu/releases)
 
-## Run it
+---
 
-```bash
-npm install
-npm run dev     # http://localhost:3000
-npm run build   # production build
-npm run typecheck
-```
+## What it does
 
-Open it on your phone during development with `npm run dev -- -H 0.0.0.0` and
-visit `http://<your-laptop-ip>:3000`.
+1. **Configure** a paper — pick subjects, question count, and a time limit.
+2. **Generate a prompt** the app writes for you, ready to paste into any
+   chatbot (ChatGPT, Claude, Gemini, etc.).
+3. **Paste the chatbot's JSON response back** into the app.
+4. **Take the exam** under the clock, with auto-submit on timeout.
+5. **Review the result** — subject-wise breakdown, accuracy, and a
+   question-by-question review with explanations.
+6. **History** — every past attempt stays on the device, browsable at any time.
 
-## Flow
+Nothing is uploaded anywhere. The question paper, your answers, and your
+score history all live in `localStorage` on the device you took the test on.
 
-```
-/            landing, resume in-progress exam, last score
-/configure   subjects + free-form question count + free-form duration
-/prompt      generated LLM prompt, copy to clipboard
-/import      paste JSON, validate, start
-/exam        timer, palette, answers (auto-saved every change)
-/result/[id] score, subject breakdown, full review
-/history     every past attempt
-```
+---
 
-## Where the data lives
+## Tech stack
 
-Everything is `localStorage`, written through `lib/storage.ts`:
+| Layer | Choice |
+|---|---|
+| Framework | [Next.js 16](https://nextjs.org) (App Router, Turbopack, static export) |
+| UI | React 19, Tailwind CSS 4 |
+| Fonts | [Geist Sans / Geist Mono](https://vercel.com/font) |
+| Mobile shell | [Capacitor 8](https://capacitorjs.com) (Android) |
+| Hosting | [Vercel](https://vercel.com) (web) |
+| Distribution (Android) | Signed APK via GitHub Actions → GitHub Releases |
+| Language | TypeScript |
 
-| Key                | Holds                                                   |
-| ------------------ | ------------------------------------------------------- |
-| `ibps.config.v1`   | last configuration, so the setup screen reopens filled   |
-| `ibps.paper.v1`    | last validated paper                                     |
-| `ibps.session.v1`  | live exam: answers, flags, `startedAt` / `endsAt`        |
-| `ibps.history.v1`  | up to 50 finished attempts, newest first                 |
+### Why the Android app is a thin shell, not a bundled offline app
 
-The timer is derived from `endsAt`, not from a counter, so closing the tab or
-locking the phone does not pause or reset it — reopening `/` offers to resume
-and the remaining time is still correct. Answers are persisted on every tap, so
-a crash costs nothing.
+`capacitor.config.ts` points `server.url` at the live Vercel deployment
+rather than bundling `webDir` content into the APK:
 
-## Marking
-
-Each subject carries its own marks and the penalty is always one quarter of them.
-
-| Subject                | Correct | Wrong  |
-| ---------------------- | ------- | ------ |
-| English                | +1      | −0.25  |
-| Quantitative Aptitude  | +1      | −0.25  |
-| Reasoning              | +1      | −0.25  |
-| Professional Knowledge | +2      | −0.50  |
-| English Descriptive    | 10      | none   |
-
-Blank answers score zero. English Descriptive is handled apart from the MCQ
-engine: it renders a textarea with a word count, is excluded from the score and
-from accuracy, and is kept in the review tab so you can grade it yourself.
-
-## Question count and duration
-
-Both are plain numeric inputs. Any count from 1 to 300 and any duration from
-1 minute to 10 hours is accepted, in any combination — 60 questions in 1 minute
-is allowed. Nothing is preset and the two values never constrain each other.
-
-The count is split across the chosen subjects in `lib/subjects.ts`; English
-Descriptive is capped at 2 questions when MCQ subjects are also selected.
-
-## JSON contract
-
-```json
-{
-  "exam": "IBPS SO IT",
-  "duration": 30,
-  "questions": [
-    {
-      "id": 1,
-      "type": "mcq",
-      "subject": "Professional Knowledge",
-      "question": "…",
-      "options": { "A": "…", "B": "…", "C": "…", "D": "…" },
-      "correctAnswer": "B",
-      "marks": 2,
-      "explanation": "…"
-    }
-  ]
+```ts
+server: {
+  url: "https://mockbysu.vercel.app",
+  cleartext: false,
 }
 ```
 
-`lib/validate.ts` strips code fences and chatter around the object, then splits
-problems into two levels. Errors block the start: unparseable JSON, a missing
-`questions` array, an unknown subject, missing question text, missing or
-malformed options, a missing or invalid `correctAnswer`. Warnings do not:
-duplicate or missing ids get renumbered, wrong `marks` get corrected to the
-subject's value, and a count that differs from what you asked for is reported
-but still playable. Error messages name the question and say what to fix, so you
-can paste them straight back to the model.
+This means the Android app always loads the current live site. **Every
+normal code change (UI, logic, question-generation prompt, scoring, etc.)
+ships instantly to every installed copy of the app the next time it's
+opened — no new APK, no user action, no app-store review.**
 
-## Adding direct LLM calls later
+A new APK release is only needed when the **native shell itself** changes —
+e.g. a new Capacitor plugin, a permission change, an app icon change, or a
+`minSdk`/`targetSdk` bump. Those are rare, which is why the project also
+ships an in-app update checker (below) that only matters for that narrow
+case.
 
-`buildPrompt(config)` and `validatePaper(raw, config)` are pure functions with
-no UI in them. To skip the copy-paste step, call your provider from a route
-handler with `buildPrompt(config)` as the user message and feed the reply into
-`validatePaper` — the rest of the app does not change.
+---
 
-## Phone and laptop
+## Project structure
 
-One codebase, two layouts, switching at Tailwind's `lg` breakpoint (1024px).
+```
+app/
+  page.tsx              Landing screen — last attempt, entry point
+  configure/             Pick subjects, question count, timer
+  prompt/                 Generated prompt to paste into a chatbot
+  import/                 Paste the chatbot's JSON response back in
+  exam/                   The timed exam screen
+  result/page.tsx        Result + review (static route, reads ?id= from
+                          the URL — see note below)
+  history/               List of all past attempts
+  layout.tsx              Root layout — fonts, metadata, mounts <UpdateBanner />
+components/
+  ui.tsx                  Shared UI primitives (Screen, ActionBar, LinkButton, etc.)
+  UpdateBanner.tsx        In-app "update available" banner (Android only)
+lib/
+  storage.ts              localStorage read/write helpers for history & session
+  scoring.ts               Scoring + formatting helpers
+  types.ts                 Shared TypeScript types (ExamResult, ExamSession, etc.)
+  update.ts                GitHub Releases version-check logic
+android/                  Capacitor-generated native Android project
+.github/workflows/        CI: build, sign, and release the Android APK
+```
 
-On a phone: one column capped at 34rem, the primary action pinned to the bottom
-of the screen within thumb reach, and the question palette behind a bottom
-sheet. On a laptop: the column widens, the pinned bar drops back into the flow
-at the end of the page (a floating bar on a wide screen reads as a phone app
-squeezed into a browser), and the pages that have two jobs split into two
-columns — subjects beside the timing inputs, score beside the full review, the
-question palette as a permanent sticky rail next to the paper.
+### Why `/result` is a static route with a query param, not `/result/[id]`
 
-Behaviour adapts too, not just layout. The exam takes keyboard input on a
-laptop: 1&ndash;4 or A&ndash;D to answer, arrows to move between questions,
-ignored while you are typing a descriptive answer. Hover states only exist
-where there is a pointer. Modals are bottom sheets on a phone and centred
-dialogs on a laptop.
+The app uses `output: "export"` for the Capacitor build, which produces a
+fully static site. Next.js requires `generateStaticParams()` for any
+dynamic route segment (`[id]`) under static export — but result IDs only
+exist in a given device's `localStorage`, so they can't be known at build
+time.
 
-Everything in between — tablets, split-screen windows, a resized browser — gets
-the phone layout, which is the safer default at any width.
+Instead, `/result` is a plain static route that reads the ID from a query
+string (`/result?id=<id>`) via `useSearchParams()`, wrapped in a
+`<Suspense>` boundary as required by Next.js. This needs no build-time
+knowledge of which IDs exist.
 
-## Design notes
+---
 
-One typeface (Geist, with Geist Mono for the timer and every figure), a warm
-paper background, ink-black type, and colour used only where it carries meaning:
-red for the last minute and wrong answers, green for correct, amber for marked.
-Dark mode follows the system. Actions sit in a fixed bar within thumb reach,
-tap targets are at least 52px, inputs are 16px so iOS never zooms, and
-`env(safe-area-inset-*)` keeps content clear of the notch and home indicator.
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+Runs the app at `http://localhost:3000` with hot reload. No environment
+variables or backend are required — everything is client-side.
+
+### Other scripts
+
+```bash
+npm run build       # Production build (static export)
+npm run start        # Serve the production build locally
+npm run lint          # ESLint
+npm run typecheck    # tsc --noEmit
+```
+
+---
+
+## Android app
+
+### Prerequisites
+
+- Node.js 22+
+- Java 21 (Temurin)
+- Android SDK (via Android Studio, or the CI's runner-preinstalled SDK)
+
+### Local Android build
+
+```bash
+npm install
+npx cap sync android
+cd android
+./gradlew assembleRelease
+```
+
+A signed release needs `android/keystore.properties` (not committed) —
+see `.github/workflows/android-release.yml` for the expected format, or
+build an unsigned debug APK with `./gradlew assembleDebug` instead.
+
+### CI/CD — how a release gets built
+
+`.github/workflows/android-release.yml` runs on every push to `main`:
+
+```
+push to main
+  → checkout, Node 22, Java 21
+  → locate & use the runner's preinstalled Android SDK cmdline-tools
+  → accept SDK licenses, install platform-tools / platforms;android-34 / build-tools;34.0.0
+  → npm install
+  → npx cap sync android
+  → restore signing keystore from repo secrets
+  → ./gradlew assembleRelease
+      -PversionCode=<github.run_number>
+      -PversionName=1.0.<github.run_number>
+  → rename output to MockBySu.apk
+  → create a GitHub Release (tag v1.0.<run_number>) with the APK attached
+```
+
+`android/app/build.gradle` reads those `-P` properties at build time:
+
+```groovy
+versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
+versionName project.hasProperty('versionName') ? project.property('versionName') : "1.0"
+```
+
+so every CI-built APK carries a real, incrementing version — not the
+hardcoded `1` / `"1.0"` placeholder that ships with a fresh Capacitor
+project.
+
+### Required repo secrets
+
+| Secret | Purpose |
+|---|---|
+| `KEYSTORE_BASE64` | Base64-encoded `.jks` signing keystore |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEY_ALIAS` | Signing key alias |
+| `KEY_PASSWORD` | Signing key password |
+
+### In-app update checker
+
+Since the app loads the live site remotely, most changes need no update
+flow at all (see above). But for the rare case where the **native shell**
+changes and a new APK is genuinely required, `lib/update.ts` +
+`components/UpdateBanner.tsx` handle it:
+
+1. On load (native platform only), `checkForUpdate()` calls
+   `App.getInfo()` (from `@capacitor/app`) to read the installed
+   `versionCode`, and fetches
+   `GET /repos/sushovancpp/mockbysu/releases/latest` from the GitHub API.
+2. It compares the trailing number in the release tag (`v1.0.<N>`) against
+   the installed `versionCode`.
+3. If a newer release exists, `<UpdateBanner />` (mounted in
+   `app/layout.tsx`, visible on every screen) shows a "Download" action
+   that opens the release's `.apk` asset via `@capacitor/browser`'s
+   `Browser.open()` — handing off to the system browser so Android's real
+   download manager and package-installer flow can take over. A plain
+   in-WebView `<a href>` won't reliably trigger this, which is why
+   `@capacitor/browser` is used instead of a direct link.
+4. Failures (no network, GitHub API rate limits, etc.) are swallowed
+   silently — a broken update check should never block the app.
+
+> **Note:** this project distributes APKs via GitHub Releases, not the
+> Google Play Store, so `com.google.android.play:app-update` (Play Core)
+> is intentionally **not** used — it only functions for Play
+> Store-installed apps and would silently no-op here.
+
+---
+
+## Data & privacy
+
+- No backend, no analytics, no accounts.
+- The generated question paper, your answers, and your score history are
+  stored entirely in the device's browser `localStorage`
+  (see `lib/storage.ts`).
+- Clearing browser data / app storage erases all history permanently —
+  there is no cloud backup.
+
+---
+
+## License
+
+Personal project — no license specified. All rights reserved unless
+stated otherwise.
+
+@Sushovan Masanta
