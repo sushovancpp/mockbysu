@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive icon BACKGROUND layer.
+  viewportWidth/Height stay at 512 so pathData below is a direct, unscaled
+  copy of the original SVG's coordinates — android:width/height (108dp) is
+  the actual rendered size; Android scales the 512-unit viewport into it
+  automatically, no manual coordinate math needed.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Full-bleed gradient fill. No rx/rounding here on purpose — the
+         adaptive icon system applies the launcher's own mask shape
+         (circle / squircle / rounded square) on top of this layer. -->
+    <path android:pathData="M0,0 H512 V512 H0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="512"
+                android:endY="512"
+                android:startColor="#6D5DFB"
+                android:endColor="#4338CA" />
+        </aapt:attr>
+    </path>
+
+    <!-- Decorative glow circles from the original design -->
+    <path
+        android:pathData="M315,92 a95,95 0 1,0 190,0 a95,95 0 1,0 -190,0 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.07" />
+    <path
+        android:pathData="M-18,438 a110,110 0 1,0 220,0 a110,110 0 1,0 -220,0 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.05" />
+
+</vector>

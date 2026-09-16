@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive icon FOREGROUND layer.
+
+  Two things from the source SVG could not be carried over, both are hard
+  limitations of the VectorDrawable format itself, not a stylistic choice:
+    - feDropShadow: VectorDrawable has no blur/filter support at all.
+    - <text>MBS</text>: VectorDrawable cannot render text; letters must
+      already be outlined as bezier paths before conversion. The header
+      pill below is kept as a plain solid shape with no letters in it.
+      See MOBILE_APP.md / the accompanying notes for how to add the
+      literal wordmark back as traced paths if you want it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Paper card -->
+    <path android:pathData="M147,82 H365 A42,42 0 0 1 407,124 V388 A42,42 0 0 1 365,430 H147 A42,42 0 0 1 105,388 V124 A42,42 0 0 1 147,82 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="256"
+                android:startY="82"
+                android:endX="256"
+                android:endY="430"
+                android:startColor="#FFFFFF"
+                android:endColor="#EEF2FF" />
+        </aapt:attr>
+    </path>
+
+    <!-- Folded corner -->
+    <path
+        android:pathData="M322,82 L407,167 L350,167 Q322,167 322,139 Z"
+        android:fillColor="#C7D2FE" />
+
+    <!-- Header pill (no letters — see note above) -->
+    <path
+        android:pathData="M163,119 H239 A21,21 0 0 1 260,140 A21,21 0 0 1 239,161 H163 A21,21 0 0 1 142,140 A21,21 0 0 1 163,119 Z"
+        android:fillColor="#4F46E5" />
+
+    <!-- Question line -->
+    <path
+        android:pathData="M150,191 H336 A8,8 0 0 1 344,199 A8,8 0 0 1 336,207 H150 A8,8 0 0 1 142,199 A8,8 0 0 1 150,191 Z"
+        android:fillColor="#CBD5E1" />
+    <path
+        android:pathData="M148.5,219 H280.5 A6.5,6.5 0 0 1 287,225.5 A6.5,6.5 0 0 1 280.5,232 H148.5 A6.5,6.5 0 0 1 142,225.5 A6.5,6.5 0 0 1 148.5,219 Z"
+        android:fillColor="#E2E8F0" />
+
+    <!-- Option 1 — selected -->
+    <path
+        android:pathData="M143,270 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 Z"
+        android:fillColor="#4F46E5" />
+    <path
+        android:pathData="M151,270 L156,275 L166,264"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M195,262 H304 A8,8 0 0 1 312,270 A8,8 0 0 1 304,278 H195 A8,8 0 0 1 187,270 A8,8 0 0 1 195,262 Z"
+        android:fillColor="#94A3B8" />
+
+    <!-- Option 2 -->
+    <path
+        android:pathData="M143,315 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 Z"
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="5" />
+    <path
+        android:pathData="M195,307 H324 A8,8 0 0 1 332,315 A8,8 0 0 1 324,323 H195 A8,8 0 0 1 187,315 A8,8 0 0 1 195,307 Z"
+        android:fillColor="#CBD5E1" />
+
+    <!-- Option 3 -->
+    <path
+        android:pathData="M143,360 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 Z"
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="5" />
+    <path
+        android:pathData="M195,352 H281 A8,8 0 0 1 289,360 A8,8 0 0 1 281,368 H195 A8,8 0 0 1 187,360 A8,8 0 0 1 195,352 Z"
+        android:fillColor="#CBD5E1" />
+
+    <!-- Success badge -->
+    <path
+        android:pathData="M315,365 a55,55 0 1,0 110,0 a55,55 0 1,0 -110,0 Z"
+        android:fillColor="#22C55E" />
+    <path
+        android:pathData="M342,365 L362,385 L400,341"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="13"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Sparkle -->
+    <path
+        android:pathData="M91,120 L98,139 L117,146 L98,153 L91,172 L84,153 L65,146 L84,139 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.9" />
+
+</vector>
