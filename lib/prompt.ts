@@ -8,7 +8,7 @@ const PK_SYLLABUS = [
   "Computer networks (OSI/TCP-IP, routing, subnetting, protocols)",
   "Software engineering (SDLC, testing, agile, UML)",
   "Object-oriented programming and basic programming concepts",
-  "Web technologies and client-server architecture",
+  "Web technologies and client-server architecture ",
   "Information security and cryptography",
   "Cloud computing, virtualisation and emerging technologies",
   "Data warehousing, big data and basic AI/ML concepts",
