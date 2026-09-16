@@ -10,6 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/network": "^8.0.1",
     "geist": "^1.7.2",
     "next": "^16.3.5",
     "react": "^19.3.0",
