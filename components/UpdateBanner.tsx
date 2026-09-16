@@ -28,7 +28,10 @@ export function UpdateBanner() {
   };
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 bg-foreground px-4 py-3 text-background">
+    <div
+      className="sticky inset-x-0 top-0 z-50 flex items-center justify-between gap-3 bg-foreground px-4 pb-3 text-background"
+      style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+    >
       <p className="text-[0.85rem]">
         Update available — {update.latestVersionName}
       </p>
