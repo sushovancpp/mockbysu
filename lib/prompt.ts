@@ -89,7 +89,7 @@ QUESTIONS PER SUBJECT (follow these counts exactly)
 ${distributionLines}
 
 CONTENT RULES
-- Match the real IBPS SO IT standard: moderate difficulty overall, with roughly 20% easy, 60% moderate and 20% hard questions spread across the paper.
+- Match the real IBPS SO IT standard: moderate difficulty overall, with roughly 20% easy, 20% moderate and 60% hard questions spread across the paper.
 - Every question must be self-contained. Do not refer to a passage, figure or table unless you include it in full inside the "question" text.${
     hasPK
       ? `
