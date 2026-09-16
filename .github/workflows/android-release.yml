@@ -26,8 +26,18 @@ jobs:
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
           cache: gradle
+
+      - name: Verify build environment
+        shell: bash
+        run: |
+          node --version
+          npm --version
+          java --version
+          javac --version
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          sdkmanager --version
 
       - name: Accept Android SDK licenses
         shell: bash
@@ -44,6 +54,7 @@ jobs:
         shell: bash
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/mockbysu-release.jks
+          test -s android/app/mockbysu-release.jks
 
       - name: Create signing properties
         shell: bash
@@ -59,7 +70,13 @@ jobs:
         working-directory: android
         run: ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }}
 
+      - name: Verify APK
+        shell: bash
+        run: |
+          test -s android/app/build/outputs/apk/release/app-release.apk
+
       - name: Rename APK
+        shell: bash
         run: |
           cp android/app/build/outputs/apk/release/app-release.apk \
              android/app/build/outputs/apk/release/MockBySu.apk
