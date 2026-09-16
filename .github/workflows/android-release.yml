@@ -29,12 +29,19 @@ jobs:
           java-version: "21"
           cache: gradle
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Android SDK PATH
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          CMDLINE_TOOLS_DIR=$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)
+          echo "Using cmdline-tools at: $CMDLINE_TOOLS_DIR"
+          echo "$CMDLINE_TOOLS_DIR/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
 
       - name: Install Android SDK packages
         shell: bash
         run: |
+          yes | sdkmanager --licenses > /dev/null || true
           sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Verify build environment
@@ -46,11 +53,6 @@ jobs:
           javac --version
           echo "ANDROID_HOME=$ANDROID_HOME"
           sdkmanager --version
-
-      - name: Accept Android SDK licenses
-        shell: bash
-        run: |
-          yes | sdkmanager --licenses > /dev/null || true
 
       - name: Install dependencies
         run: npm install
