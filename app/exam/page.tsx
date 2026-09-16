@@ -33,7 +33,7 @@ export default function ExamPage() {
       const result = scoreSession(session, reason);
       storage.saveResult(result);
       storage.clearSession();
-      router.replace(`/result/${result.id}`);
+      router.replace(`/result?id=${result.id}`);
     },
     [router, session],
   );

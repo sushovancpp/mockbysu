@@ -75,7 +75,7 @@ export default function Landing() {
         <div className="lg:pt-6">
           {ready && last && (
             <Link
-              href={`/result/${last.id}`}
+              href={`/result?id=${last.id}`}
               className="mb-8 block rounded-3xl border border-line bg-raised p-5"
             >
               <div className="flex items-end justify-between">

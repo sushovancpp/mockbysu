@@ -57,7 +57,7 @@ export default function HistoryPage() {
                 key={r.id}
                 className="rounded-3xl border border-line bg-raised transition-colors hover:border-ink/25"
               >
-                <Link href={`/result/${r.id}`} className="block p-4">
+                <Link href={`/result?id=${r.id}`} className="block p-4">
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="tnum text-[1.5rem] leading-none font-semibold tracking-tight">
                       {r.score}

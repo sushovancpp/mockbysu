@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { ActionBar, LinkButton, Screen, Stat, TopBar } from "@/components/ui";
 import { formatClock } from "@/lib/scoring";
 import { storage } from "@/lib/storage";
@@ -10,22 +10,27 @@ import type { ExamResult } from "@/lib/types";
 
 type Tab = "summary" | "review";
 
-export default function ResultPage() {
+function ResultContent() {
   const router = useRouter();
-  const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const [result, setResult] = useState<ExamResult | null>(null);
   const [tab, setTab] = useState<Tab>("summary");
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const found = storage.getResult(params.id);
+    if (!id) {
+      router.replace("/history");
+      return;
+    }
+    const found = storage.getResult(id);
     if (!found) {
       router.replace("/history");
       return;
     }
     setResult(found);
     setLoaded(true);
-  }, [params.id, router]);
+  }, [id, router]);
 
   if (!loaded || !result) return <Screen>{null}</Screen>;
 
@@ -229,5 +234,13 @@ export default function ResultPage() {
         </div>
       </ActionBar>
     </Screen>
+  );
+}
+
+export default function ResultPage() {
+  return (
+    <Suspense fallback={<Screen>{null}</Screen>}>
+      <ResultContent />
+    </Suspense>
   );
 }
