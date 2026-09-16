@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #faf9f6;
+  --color-raised: #ffffff;
+  --color-ink: #14151a;
+  --color-muted: #6e7079;
+  --color-line: #e3e2dc;
+  --color-good: #1f7a54;
+  --color-bad: #b03a2e;
+  --color-flag: #a8710a;
+
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-paper: #0e0f12;
+    --color-raised: #16181c;
+    --color-ink: #f3f2ee;
+    --color-muted: #9a9ca4;
+    --color-line: #26282e;
+    --color-good: #4ac08a;
+    --color-bad: #e2705f;
+    --color-flag: #dba32b;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--color-paper);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Keep iOS from zooming when a numeric field is focused. */
+input,
+textarea,
+select,
+button {
+  font: inherit;
+  font-size: max(16px, 1rem);
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
